@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # Evaluates to 'iamminakshi/axion-ingestion-service'
+  #  Evaluates to 'iamminakshi/axion-ingestion-service'
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
