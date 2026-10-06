@@ -4,11 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-
 env:
-  REGISTRY: ghcr.io
-  # Evaluates to 'asign796/axion-ingestion-service'
-  IMAGE_NAME: ${{ github.repository }}
+REGISTRY: ghcr.io
+IMAGE_NAME: iamminakshi/axion-ingestion-service
 
 jobs:
   build-and-push:
