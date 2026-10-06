@@ -1,61 +1,57 @@
 name: Build & Push Container Image to GHCR
 
 on:
-push:
-branches:
-- main
-workflow_dispatch:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 env:
-REGISTRY: ghcr.io
-IMAGE_NAME: ${{ github.repository }}
-
-# Required permission to push image to GHCR
-
-permissions:
-contents: read
-packages: write
+  REGISTRY: ghcr.io
+  # Evaluates to 'asign796/axion-ingestion-service'
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-build-and-push:
-name: Build and Push Docker Image
-runs-on: ubuntu-latest
-steps:
+  build-and-push:
+    name: Build & Push to GitHub Packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Grants permission to push to GHCR
 
-  # Checkout repository
-  - name: Checkout Code
-    uses: actions/checkout@v4
+    steps:
+      # 1. Checkout source code
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  # Setup Docker Buildx
-  - name: Setup Docker Buildx
-    uses: docker/setup-buildx-action@v3
+      # 2. Set up Docker Buildx for cached builds
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-  # Login to GitHub Container Registry
-  - name: Login to GHCR
-    uses: docker/login-action@v3
-    with:
-      registry: ${{ env.REGISTRY }}
-      username: ${{ github.actor }}
-      password: ${{ secrets.GITHUB_TOKEN }}
+      # 3. Log in to GHCR using the automatic GitHub token
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  # Generate Docker image metadata
-  - name: Docker Metadata
-    id: meta
-    uses: docker/metadata-action@v5
-    with:
-      images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-      tags: |
-        type=sha
-        type=raw,value=latest,enable={{is_default_branch}}
+      # 4. Generate dynamic tags (Commit SHA & 'latest')
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
-  # Build and Push Docker Image
-  - name: Build and Push
-    uses: docker/build-push-action@v6
-    with:
-      context: .
-      push: true
-      tags: ${{ steps.meta.outputs.tags }}
-      labels: ${{ steps.meta.outputs.labels }}
-      cache-from: type=gha
-      cache-to: type=gha,mode=max
-      
+      # 5. Build and push image to GHCR
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
