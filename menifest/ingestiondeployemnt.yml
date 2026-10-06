@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ingestion-service
-  namespace: axion-app
   
 spec:
   replicas: 1
@@ -16,7 +15,7 @@ spec:
     spec:
       containers:
         - name: ingestion-service
-          image: ghcr.io/contactanamika55/axion-ingestion-service:d931142
+          image: ghcr.io/iamminakshi/axion-ingestion-service-v2:633b5c8
           imagePullPolicy: IfNotPresent
 
           ports:
@@ -24,6 +23,5 @@ spec:
 
           env:
             - name: DATABASE_URL
-              value: "postgresql://admin:admin%40123@postgres-service:5432/mydb123"
+              value: "postgresql://postgres:Postgres%4012345@postgres-service:5432/axiondb"
 
-              
