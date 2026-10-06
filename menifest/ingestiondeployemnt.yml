@@ -25,3 +25,5 @@ spec:
           env:
             - name: DATABASE_URL
               value: "postgresql://admin:admin%40123@postgres-service:5432/mydb123"
+
+              
